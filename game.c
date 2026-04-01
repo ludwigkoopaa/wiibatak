@@ -6,10 +6,10 @@
 #include <string.h>
 
 static const char *k_player_names[PLAYER_COUNT] = {
-	"GUNEY",
-	"DOGU",
-	"KUZEY",
-	"BATI"
+	"SOUTH",
+	"EAST",
+	"NORTH",
+	"WEST"
 };
 
 static void score_round(GameState *game);
@@ -338,7 +338,7 @@ static void finish_trick(GameState *game) {
 	game->active_player = winner;
 	game->trick_count++;
 	game->trick_ready = true;
-	set_status(game, "%s ELI ALDI.", game->players[winner].name);
+	set_status(game, "%s TOOK THE TRICK.", game->players[winner].name);
 
 	if (game->trick_count >= HAND_SIZE) {
 		game->phase = PHASE_SCORING;
@@ -374,11 +374,11 @@ static void score_round(GameState *game) {
 	game->round_winner = best_player;
 	if (best_score >= TARGET_SCORE) {
 		game->phase = PHASE_GAME_OVER;
-		set_status(game, "%s MACI KAZANDI. A ILE YENI MAC BASLAT.", game->players[best_player].name);
+		set_status(game, "%s WON THE MATCH. PRESS A FOR A NEW MATCH.", game->players[best_player].name);
 		return;
 	}
 
-	set_status(game, "EL BITTI. SKORLAR YAZILDI, A ILE YENI EL.");
+	set_status(game, "ROUND OVER. SCORES UPDATED, PRESS A FOR NEXT ROUND.");
 }
 
 void game_init(GameState *game) {
@@ -459,14 +459,14 @@ void game_reset_round(GameState *game) {
 	game->trump_broken = false;
 	game->ai_next_action_ms = 0;
 	game->round_winner = -1;
-	set_status(game, "A ILE IHALEYE BASLA.");
+	set_status(game, "PRESS A TO START BIDDING.");
 }
 
 void game_start_bidding(GameState *game) {
 	game->phase = PHASE_BIDDING;
 	game->active_player = (game->dealer + 1) % PLAYER_COUNT;
 	game->current_bid = game->highest_bid > 0 ? game->highest_bid + 1 : 4;
-	set_status(game, "%s IHALEDE.", game->players[game->active_player].name);
+	set_status(game, "%s IS BIDDING.", game->players[game->active_player].name);
 }
 
 void game_advance_round(GameState *game) {
@@ -541,14 +541,14 @@ void game_change_trump(GameState *game, int delta) {
 	}
 
 	game->trump = (Suit)((game->trump + delta + SUIT_COUNT) % SUIT_COUNT);
-	set_status(game, "%s KOZU %s SECIYOR.", game->players[game->highest_bidder].name, game_suit_label(game->trump));
+	set_status(game, "%s IS CHOOSING %s AS TRUMP.", game->players[game->highest_bidder].name, game_suit_label(game->trump));
 }
 
 static void lock_bid(GameState *game, int bid_value) {
 	PlayerState *player = &game->players[game->active_player];
 
 	if (bid_value > 0 && bid_value <= game->highest_bid) {
-		set_status(game, "IHALE %d USTU OLMALI.", game->highest_bid);
+		set_status(game, "BID MUST BE ABOVE %d.", game->highest_bid);
 		return;
 	}
 
@@ -569,13 +569,13 @@ static void lock_bid(GameState *game, int bid_value) {
 		game->phase = PHASE_TRUMP_SELECT;
 		game->active_player = game->highest_bidder;
 		game->trump = SUIT_SPADES;
-		set_status(game, "%s KOZ SECIYOR.", game->players[game->highest_bidder].name);
+		set_status(game, "%s IS CHOOSING TRUMP.", game->players[game->highest_bidder].name);
 		return;
 	}
 
 	game->active_player = (game->active_player + 1) % PLAYER_COUNT;
 	game->current_bid = game->highest_bid > 0 ? game->highest_bid + 1 : 4;
-	set_status(game, "%s IHALEDE.", game->players[game->active_player].name);
+	set_status(game, "%s IS BIDDING.", game->players[game->active_player].name);
 }
 
 static void clear_trick(GameState *game) {
@@ -602,13 +602,13 @@ static void play_selected_card(GameState *game, int player_index, int card_index
 		Card attempted = player->cards[card_index];
 		Suit lead_suit = trick_lead_suit(game);
 		if (lead_suit == SUIT_COUNT && !game->trump_broken && attempted.suit == game->trump && player_has_non_trump(player, game->trump)) {
-			set_status(game, "KOZ KIRILMADAN KOZ ACAMAZSIN.");
+			set_status(game, "YOU CANNOT LEAD TRUMP BEFORE IT IS BROKEN.");
 		} else if (lead_suit != SUIT_COUNT && player_has_suit(player, lead_suit)) {
-			set_status(game, "YERDEKI RENKTEN GITMELISIN.");
+			set_status(game, "YOU MUST FOLLOW SUIT.");
 		} else if (lead_suit != SUIT_COUNT && player_has_suit(player, game->trump) && attempted.suit != game->trump) {
-			set_status(game, "RENK YOKSA KOZ ATMALISIN.");
+			set_status(game, "IF YOU CANNOT FOLLOW, YOU MUST PLAY TRUMP.");
 		} else {
-			set_status(game, "DAHA BUYUK KOZ VARKEN ONU ATMALISIN.");
+			set_status(game, "YOU MUST PLAY A HIGHER TRUMP IF YOU HAVE ONE.");
 		}
 		return;
 	}
@@ -626,7 +626,7 @@ static void play_selected_card(GameState *game, int player_index, int card_index
 		int next = (player_index + i) % PLAYER_COUNT;
 		if (!game->trick_filled[next] && game->players[next].card_count > 0) {
 			game->active_player = next;
-			set_status(game, "%s OYNAYACAK.", game->players[next].name);
+			set_status(game, "%s TO PLAY.", game->players[next].name);
 			return;
 		}
 	}
@@ -670,13 +670,13 @@ void game_confirm_action(GameState *game) {
 			game->phase = PHASE_PLAYING;
 			game->active_player = game->highest_bidder;
 			game->lead_player = game->active_player;
-			set_status(game, "KOZ %s. %s BASLIYOR.", game_suit_label(game->trump), game->players[game->active_player].name);
+			set_status(game, "TRUMP IS %s. %s LEADS.", game_suit_label(game->trump), game->players[game->active_player].name);
 		}
 		break;
 	case PHASE_PLAYING:
 		if (game->trick_ready) {
 			clear_trick(game);
-			set_status(game, "%s OYNAYACAK.", game->players[game->active_player].name);
+			set_status(game, "%s TO PLAY.", game->players[game->active_player].name);
 		} else if (game->active_player == HUMAN_PLAYER) {
 			play_selected_card(game, HUMAN_PLAYER, game->players[HUMAN_PLAYER].selected);
 		}
@@ -713,14 +713,14 @@ void game_tick(GameState *game, unsigned int now_ms) {
 		game->phase = PHASE_PLAYING;
 		game->active_player = game->highest_bidder;
 		game->lead_player = game->active_player;
-		set_status(game, "KOZ %s. %s BASLIYOR.", game_suit_label(game->trump), game->players[game->active_player].name);
+		set_status(game, "TRUMP IS %s. %s LEADS.", game_suit_label(game->trump), game->players[game->active_player].name);
 		game->ai_next_action_ms = now_ms + 600;
 		return;
 	}
 
 	if (game->phase == PHASE_PLAYING && game->trick_ready) {
 		clear_trick(game);
-		set_status(game, "%s OYNAYACAK.", game->players[game->active_player].name);
+		set_status(game, "%s TO PLAY.", game->players[game->active_player].name);
 		game->ai_next_action_ms = now_ms + 700;
 		return;
 	}
@@ -737,21 +737,21 @@ void game_tick(GameState *game, unsigned int now_ms) {
 const char *game_phase_label(GamePhase phase) {
 	switch (phase) {
 	case PHASE_MENU: return "MENU";
-	case PHASE_BIDDING: return "IHALE";
-	case PHASE_TRUMP_SELECT: return "KOZ";
-	case PHASE_PLAYING: return "OYUN";
-	case PHASE_SCORING: return "SKOR";
-	case PHASE_GAME_OVER: return "SON";
-	default: return "BILINMIYOR";
+	case PHASE_BIDDING: return "BID";
+	case PHASE_TRUMP_SELECT: return "TRUMP";
+	case PHASE_PLAYING: return "PLAY";
+	case PHASE_SCORING: return "SCORE";
+	case PHASE_GAME_OVER: return "END";
+	default: return "UNKNOWN";
 	}
 }
 
 const char *game_suit_label(Suit suit) {
 	switch (suit) {
-	case SUIT_CLUBS: return "SINEK";
-	case SUIT_DIAMONDS: return "KARO";
-	case SUIT_HEARTS: return "KUPA";
-	case SUIT_SPADES: return "MACA";
+	case SUIT_CLUBS: return "CLUBS";
+	case SUIT_DIAMONDS: return "DIAMONDS";
+	case SUIT_HEARTS: return "HEARTS";
+	case SUIT_SPADES: return "SPADES";
 	default: return "?";
 	}
 }

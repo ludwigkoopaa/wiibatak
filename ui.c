@@ -185,16 +185,16 @@ static void draw_player_panel(SDL_Renderer *renderer, int x, int y, int w, int h
 	snprintf(line, sizeof(line), "%s", player->name);
 	draw_text(renderer, x + 8, y + 8, 2, (SDL_Color){ 248, 245, 231, 255 }, line);
 
-	snprintf(line, sizeof(line), "EL:%d", player->card_count);
+	snprintf(line, sizeof(line), "CARDS:%d", player->card_count);
 	draw_text(renderer, x + 8, y + 32, 1, (SDL_Color){ 229, 237, 223, 255 }, line);
 
-	snprintf(line, sizeof(line), "IHALE:%d", player->bid);
+	snprintf(line, sizeof(line), "BID:%d", player->bid);
 	draw_text(renderer, x + 8, y + 46, 1, (SDL_Color){ 229, 237, 223, 255 }, line);
 
-	snprintf(line, sizeof(line), "ALDI:%d", player->tricks_won);
+	snprintf(line, sizeof(line), "TRICKS:%d", player->tricks_won);
 	draw_text(renderer, x + 8, y + 58, 1, (SDL_Color){ 229, 237, 223, 255 }, line);
 
-	snprintf(line, sizeof(line), "SKOR:%d", player->score);
+	snprintf(line, sizeof(line), "SCORE:%d", player->score);
 	draw_text(renderer, x + 8, y + 70, 1, (SDL_Color){ 229, 237, 223, 255 }, line);
 }
 
@@ -249,10 +249,10 @@ static void draw_trick_area(SDL_Renderer *renderer, const GameState *game) {
 
 	fill_rect(renderer, 210, 145, 220, 170, center);
 	draw_rect(renderer, 210, 145, 220, 170, (SDL_Color){ 194, 162, 94, 255 });
-	draw_text(renderer, 255, 156, 2, (SDL_Color){ 245, 234, 201, 255 }, "ORTA");
+	draw_text(renderer, 258, 156, 2, (SDL_Color){ 245, 234, 201, 255 }, "TABLE");
 	if (game->last_trick_winner >= 0 && !game->trick_ready) {
 		char winner[32];
-		snprintf(winner, sizeof(winner), "ALAN:%s", game->players[game->last_trick_winner].name);
+		snprintf(winner, sizeof(winner), "WINNER:%s", game->players[game->last_trick_winner].name);
 		draw_text(renderer, 246, 178, 1, (SDL_Color){ 241, 228, 189, 255 }, winner);
 	}
 
@@ -275,25 +275,25 @@ void ui_render(SDL_Renderer *renderer, const GameState *game, bool paused, bool 
 	draw_rect(renderer, 10, 10, SCREEN_WIDTH - 20, 84, (SDL_Color){ 182, 159, 104, 255 });
 
 	draw_text(renderer, 24, 22, 2, (SDL_Color){ 245, 241, 222, 255 }, "WII BATAK");
-	snprintf(line, sizeof(line), "FAZ:%s", game_phase_label(game->phase));
+	snprintf(line, sizeof(line), "PHASE:%s", game_phase_label(game->phase));
 	draw_text(renderer, 24, 50, 1, (SDL_Color){ 221, 229, 216, 255 }, line);
-	snprintf(line, sizeof(line), "KOZ:%s", game_suit_label(game->trump));
+	snprintf(line, sizeof(line), "TRUMP:%s", game_suit_label(game->trump));
 	draw_text(renderer, 142, 50, 1, (SDL_Color){ 221, 229, 216, 255 }, line);
 	if (game->highest_bidder >= 0) {
-		snprintf(line, sizeof(line), "MAX:%d %s", game->highest_bid, game->players[game->highest_bidder].name);
+		snprintf(line, sizeof(line), "HIGH:%d %s", game->highest_bid, game->players[game->highest_bidder].name);
 		draw_text(renderer, 142, 64, 1, (SDL_Color){ 255, 214, 10, 255 }, line);
 	}
-	snprintf(line, sizeof(line), "EL:%d", game->round_number);
+	snprintf(line, sizeof(line), "ROUND:%d", game->round_number);
 	draw_text(renderer, 248, 50, 1, (SDL_Color){ 221, 229, 216, 255 }, line);
-	snprintf(line, sizeof(line), "HEDEF:%d", TARGET_SCORE);
+	snprintf(line, sizeof(line), "TARGET:%d", TARGET_SCORE);
 	draw_text(renderer, 248, 64, 1, (SDL_Color){ 221, 229, 216, 255 }, line);
-	snprintf(line, sizeof(line), "SIRA:%s", game->players[game->active_player].name);
+	snprintf(line, sizeof(line), "TURN:%s", game->players[game->active_player].name);
 	draw_text(renderer, 312, 50, 1, (SDL_Color){ 255, 214, 10, 255 }, line);
 
-	draw_text(renderer, 380, 22, 1, (SDL_Color){ 224, 229, 219, 255 }, "HOME CIKIS");
-	draw_text(renderer, 380, 36, 1, (SDL_Color){ 224, 229, 219, 255 }, "PLUS DURAKLAT");
-	draw_text(renderer, 380, 50, 1, (SDL_Color){ 224, 229, 219, 255 }, "MINUS YENI EL");
-	draw_text(renderer, 380, 64, 1, (SDL_Color){ 224, 229, 219, 255 }, "A ONAY B PAS");
+	draw_text(renderer, 380, 22, 1, (SDL_Color){ 224, 229, 219, 255 }, "HOME EXIT");
+	draw_text(renderer, 380, 36, 1, (SDL_Color){ 224, 229, 219, 255 }, "PLUS PAUSE");
+	draw_text(renderer, 380, 50, 1, (SDL_Color){ 224, 229, 219, 255 }, "MINUS NEW DEAL");
+	draw_text(renderer, 380, 64, 1, (SDL_Color){ 224, 229, 219, 255 }, "A CONFIRM B PASS");
 
 	draw_player_panel(renderer, 228, 94, 184, 86, top, game->active_player == 2);
 	draw_player_panel(renderer, 438, 168, 184, 86, right, game->active_player == 1);
@@ -311,67 +311,67 @@ void ui_render(SDL_Renderer *renderer, const GameState *game, bool paused, bool 
 	if (game->phase == PHASE_MENU) {
 		fill_rect(renderer, 148, 208, 344, 62, (SDL_Color){ 31, 33, 48, 220 });
 		draw_rect(renderer, 148, 208, 344, 62, (SDL_Color){ 255, 214, 10, 255 });
-		draw_text(renderer, 170, 222, 2, (SDL_Color){ 248, 245, 231, 255 }, "A ILE BASLA");
+		draw_text(renderer, 170, 222, 2, (SDL_Color){ 248, 245, 231, 255 }, "PRESS A TO START");
 	} else if (game->phase == PHASE_BIDDING) {
-		snprintf(line, sizeof(line), "TEKLIF:%d", game->current_bid);
+		snprintf(line, sizeof(line), "BID:%d", game->current_bid);
 		fill_rect(renderer, 175, 208, 290, 62, (SDL_Color){ 31, 33, 48, 220 });
 		draw_rect(renderer, 175, 208, 290, 62, (SDL_Color){ 255, 214, 10, 255 });
 		if (game->active_player == HUMAN_PLAYER) {
 			draw_text(renderer, 200, 222, 2, (SDL_Color){ 248, 245, 231, 255 }, line);
-			draw_text(renderer, 168, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "1/2 DEGIS A ONAY B PAS");
+			draw_text(renderer, 150, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "1/2 CHANGE  A CONFIRM  B PASS");
 		} else {
-			snprintf(line, sizeof(line), "%s DUSUNUYOR", game->players[game->active_player].name);
+			snprintf(line, sizeof(line), "%s IS THINKING", game->players[game->active_player].name);
 			draw_text(renderer, 176, 222, 2, (SDL_Color){ 248, 245, 231, 255 }, line);
 		}
 	} else if (game->phase == PHASE_TRUMP_SELECT) {
 		fill_rect(renderer, 162, 208, 316, 62, (SDL_Color){ 31, 33, 48, 220 });
 		draw_rect(renderer, 162, 208, 316, 62, (SDL_Color){ 255, 214, 10, 255 });
-		snprintf(line, sizeof(line), "KOZ:%s", game_suit_label(game->trump));
+		snprintf(line, sizeof(line), "TRUMP:%s", game_suit_label(game->trump));
 		draw_text(renderer, 188, 222, 2, (SDL_Color){ 248, 245, 231, 255 }, line);
-		draw_text(renderer, 126, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, game->highest_bidder == HUMAN_PLAYER ? "SOL/SAG KOZ SEC A BASLAT" : "AI KOZU OTOMATIK SECIYOR");
+		draw_text(renderer, 126, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, game->highest_bidder == HUMAN_PLAYER ? "LEFT/RIGHT CHOOSE TRUMP  A CONFIRM" : "AI CHOOSES TRUMP AUTOMATICALLY");
 	} else if (game->phase == PHASE_PLAYING) {
 		if (game->trick_ready) {
-			draw_text(renderer, 194, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "EL KAPANIYOR");
+			draw_text(renderer, 212, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "TRICK ENDING");
 		} else if (game->active_player == HUMAN_PLAYER) {
-			draw_text(renderer, 198, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "SOL SAG KART SEC A OYNA");
+			draw_text(renderer, 152, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "LEFT/RIGHT SELECT CARD  A PLAY");
 		} else {
-			draw_text(renderer, 194, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "RAKIP KART OYNUYOR");
+			draw_text(renderer, 184, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "OPPONENT IS PLAYING");
 		}
 	} else if (game->phase == PHASE_SCORING) {
 		fill_rect(renderer, 126, 196, 388, 96, (SDL_Color){ 31, 33, 48, 220 });
 		draw_rect(renderer, 126, 196, 388, 96, (SDL_Color){ 255, 214, 10, 255 });
-		snprintf(line, sizeof(line), "KONTRAT:%s %d", game->players[game->highest_bidder].name, game->highest_bid);
+		snprintf(line, sizeof(line), "CONTRACT:%s %d", game->players[game->highest_bidder].name, game->highest_bid);
 		draw_text(renderer, 148, 212, 1, (SDL_Color){ 248, 245, 231, 255 }, line);
-		snprintf(line, sizeof(line), "EL ALAN EN IYI:%s", game->players[game->round_winner].name);
+		snprintf(line, sizeof(line), "ROUND LEADER:%s", game->players[game->round_winner].name);
 		draw_text(renderer, 148, 232, 1, (SDL_Color){ 248, 245, 231, 255 }, line);
-		snprintf(line, sizeof(line), "IH.%d ALDI:%d SKOR:%d", game->players[game->highest_bidder].bid, game->players[game->highest_bidder].tricks_won, game->players[game->highest_bidder].score);
+		snprintf(line, sizeof(line), "BID:%d TOOK:%d SCORE:%d", game->players[game->highest_bidder].bid, game->players[game->highest_bidder].tricks_won, game->players[game->highest_bidder].score);
 		draw_text(renderer, 148, 252, 1, (SDL_Color){ 248, 245, 231, 255 }, line);
-		draw_text(renderer, 158, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "A ILE OZETI KAPAT VE YENI EL BASLAT");
+		draw_text(renderer, 132, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "PRESS A TO CLOSE SUMMARY AND START NEXT ROUND");
 	} else if (game->phase == PHASE_GAME_OVER) {
 		fill_rect(renderer, 108, 186, 424, 118, (SDL_Color){ 31, 33, 48, 228 });
 		draw_rect(renderer, 108, 186, 424, 118, (SDL_Color){ 255, 214, 10, 255 });
-		snprintf(line, sizeof(line), "%s KAZANDI", game->players[game->round_winner].name);
+		snprintf(line, sizeof(line), "%s WINS", game->players[game->round_winner].name);
 		draw_text(renderer, 190, 206, 2, (SDL_Color){ 248, 245, 231, 255 }, line);
-		snprintf(line, sizeof(line), "SKOR:%d", game->players[game->round_winner].score);
+		snprintf(line, sizeof(line), "SCORE:%d", game->players[game->round_winner].score);
 		draw_text(renderer, 160, 238, 1, (SDL_Color){ 248, 245, 231, 255 }, line);
-		draw_text(renderer, 150, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "A ILE YENI MAC BASLAT");
+		draw_text(renderer, 136, 326, 1, (SDL_Color){ 248, 245, 231, 255 }, "PRESS A TO START A NEW MATCH");
 	}
 
 	if (paused) {
 		fill_rect(renderer, 92, 122, 456, 236, (SDL_Color){ 16, 20, 26, 220 });
 		draw_rect(renderer, 92, 122, 456, 236, (SDL_Color){ 255, 214, 10, 255 });
-		draw_text(renderer, 232, 142, 2, (SDL_Color){ 248, 245, 231, 255 }, "DURAKLADI");
+		draw_text(renderer, 250, 142, 2, (SDL_Color){ 248, 245, 231, 255 }, "PAUSED");
 		if (show_help) {
-			draw_text(renderer, 122, 184, 1, (SDL_Color){ 248, 245, 231, 255 }, "A DEVAM ET");
-			draw_text(renderer, 122, 202, 1, (SDL_Color){ 248, 245, 231, 255 }, "B YARDIM GIZLE");
-			draw_text(renderer, 122, 220, 1, (SDL_Color){ 248, 245, 231, 255 }, "HOME/START CIK");
-			draw_text(renderer, 122, 248, 1, (SDL_Color){ 248, 245, 231, 255 }, "IHALE: 1/2 DEGISTIR A ONAY B PAS");
-			draw_text(renderer, 122, 266, 1, (SDL_Color){ 248, 245, 231, 255 }, "KOZ: SOL/SAG SEC A BASLAT");
-			draw_text(renderer, 122, 284, 1, (SDL_Color){ 248, 245, 231, 255 }, "OYUN: SOL/SAG KART SEC A OYNA");
-			draw_text(renderer, 122, 302, 1, (SDL_Color){ 248, 245, 231, 255 }, "KIRMIZI CERCEVE: GECERSIZ SECIM");
-			draw_text(renderer, 122, 320, 1, (SDL_Color){ 248, 245, 231, 255 }, "ENTER/SPACE VE SOL TIK = ONAY");
+			draw_text(renderer, 122, 184, 1, (SDL_Color){ 248, 245, 231, 255 }, "A RESUME");
+			draw_text(renderer, 122, 202, 1, (SDL_Color){ 248, 245, 231, 255 }, "B HIDE HELP");
+			draw_text(renderer, 122, 220, 1, (SDL_Color){ 248, 245, 231, 255 }, "HOME/START EXIT");
+			draw_text(renderer, 122, 248, 1, (SDL_Color){ 248, 245, 231, 255 }, "BID: 1/2 CHANGE  A CONFIRM  B PASS");
+			draw_text(renderer, 122, 266, 1, (SDL_Color){ 248, 245, 231, 255 }, "TRUMP: LEFT/RIGHT CHOOSE  A CONFIRM");
+			draw_text(renderer, 122, 284, 1, (SDL_Color){ 248, 245, 231, 255 }, "PLAY: LEFT/RIGHT SELECT CARD  A PLAY");
+			draw_text(renderer, 122, 302, 1, (SDL_Color){ 248, 245, 231, 255 }, "RED BORDER: ILLEGAL SELECTION");
+			draw_text(renderer, 122, 320, 1, (SDL_Color){ 248, 245, 231, 255 }, "ENTER/SPACE AND LEFT CLICK = CONFIRM");
 		} else {
-			draw_text(renderer, 166, 236, 1, (SDL_Color){ 248, 245, 231, 255 }, "A DEVAM ET  B YARDIM GOSTER");
+			draw_text(renderer, 154, 236, 1, (SDL_Color){ 248, 245, 231, 255 }, "A RESUME  B SHOW HELP");
 		}
 	}
 }
